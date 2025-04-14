@@ -15,7 +15,7 @@ This repo contains a proof-of-concept example of the system described in the pap
 
 ### Launching vLLM servers
 
-The script `spec_reason.py` requires two vLLM engines to be up and running. We use the following command to launch a 32B base model and a 1.5B base model on two A6000-48GB GPUs, both with TP=2.
+The script `spec_reason.py` requires two vLLM engines to be up and running. We use the following command to launch a 32B base model and a 1.5B small model on two A6000-48GB GPUs, both with TP=2.
 
 You might need to adjust the ratio of how the KV cache memory space is partitioned (`--gpu-memory-utilization 0.1`) according to your hardware setup.
 
