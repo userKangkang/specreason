@@ -200,6 +200,8 @@ parser.add_argument("--score_method", type=str, choices=["greedy", "average"], d
                     help="Scoring method")
 parser.add_argument("--output_dir", type=str, default="/data2/ruipan/specreason/playground", 
                     help="Where result pickle files will be written to")
+parser.add_argument("--first_n_steps_base_model", type=int, default=0, 
+                    help="First n steps use base model only")  
 args, _ = parser.parse_known_args()
 
 if not os.path.exists(args.output_dir):
@@ -237,34 +239,43 @@ metadata_list = []
 try:
     while True:
         warning_flag = False
-        
-        # 1. generate a reasoning step using a small model
-        step_str, finished, num_output_tokens = generate_new_step(problem, steps_so_far, "1.5b", options=options)
-        small_model_step, num_output_tokens_small = step_str, num_output_tokens
+        if step_id < args.first_n_steps_base_model:  # First n steps use base model
+            base_model_step, finished, num_output_tokens_base = generate_new_step(problem, steps_so_far, "32b", options=options)
 
-        # 2. use the base model to score the step
-        score, justification, response = get_score(args, problem, steps_so_far + [step_str], options=options)
-        
-        # 3. if over a threshold, accept. else, generate a reasoning step using the base model.
-        if score is not None and score >= args.score_threshold:
-            logging.info(f"[Step {step_id}] score {score}, accepted!")
-            base_model_step, num_output_tokens_base = None, None
+            small_model_step, num_output_tokens_small = None, None
+            score, justification = None, None
+            step_str = base_model_step
+            steps_so_far.append(step_str)
+            logging.info(f"[Step {step_id}] final step_str: {step_str}")
+
         else:
-            logging.info(f"[Step {step_id}] score {score} rejected, falling back to base model")
-            step_str, finished, num_output_tokens = generate_new_step(problem, steps_so_far, "32b", options=options)
-            base_model_step, num_output_tokens_base = step_str, num_output_tokens
-        # NOTE(ruipan): potential optimization is to pipeline the decoding of these two models rather than sequentially
-        
-        if "</think>" in step_str and not any([x in step_str for x in ["boxed", "Answer:", "ANSWER:"]]):
-            # FIXME(ruipan): handles a very rare edge case of generating a stop thinking token midway through answering.
-            # Although it could be that thinking finished, but the last step didn't format the answer with \boxed{}
-            logging.warning(f"Warning: step_str had a </think>, removing. {step_str}")
-            step_str = step_str.replace("</think>", "")
-            warning_flag = True
-        
-        # 4. repeat until an answer gets generated in the response
-        steps_so_far.append(step_str)
-        logging.info(f"[Step {step_id}] final step_str: {step_str}")
+            # 1. generate a reasoning step using a small model
+            step_str, finished, num_output_tokens = generate_new_step(problem, steps_so_far, "1.5b", options=options)
+            small_model_step, num_output_tokens_small = step_str, num_output_tokens
+
+            # 2. use the base model to score the step
+            score, justification, response = get_score(args, problem, steps_so_far + [step_str], options=options)
+            
+            # 3. if over a threshold, accept. else, generate a reasoning step using the base model.
+            if score is not None and score >= args.score_threshold:
+                logging.info(f"[Step {step_id}] score {score}, accepted!")
+                base_model_step, num_output_tokens_base = None, None
+            else:
+                logging.info(f"[Step {step_id}] score {score} rejected, falling back to base model")
+                step_str, finished, num_output_tokens = generate_new_step(problem, steps_so_far, "32b", options=options)
+                base_model_step, num_output_tokens_base = step_str, num_output_tokens
+            # NOTE(ruipan): potential optimization is to pipeline the decoding of these two models rather than sequentially
+            
+            if "</think>" in step_str and not any([x in step_str for x in ["boxed", "Answer:", "ANSWER:"]]):
+                # FIXME(ruipan): handles a very rare edge case of generating a stop thinking token midway through answering.
+                # Although it could be that thinking finished, but the last step didn't format the answer with \boxed{}
+                logging.warning(f"Warning: step_str had a </think>, removing. {step_str}")
+                step_str = step_str.replace("</think>", "")
+                warning_flag = True
+            
+            # 4. repeat until an answer gets generated in the response
+            steps_so_far.append(step_str)
+            logging.info(f"[Step {step_id}] final step_str: {step_str}")
         
         metadata = {
             "step_id": step_id,
