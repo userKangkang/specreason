@@ -13,12 +13,12 @@
 #SBATCH --partition=pli
 #SBATCH --account=specreason
 
-CLUSTER="ravi"
-# CLUSTER="della"
+# CLUSTER="ravi"
+CLUSTER="della"
 
 # initialization: set environment variables based on the cluster
 if [ "$CLUSTER" = "ravi" ]; then
-    DATA_DIR="/home/weiquan/data2"
+    DATA_DIR="/home/ruipan/data2"
 elif [ "$CLUSTER" = "della" ]; then
     DATA_DIR="/scratch/gpfs/rp2773/data"
     export HF_HOME="/scratch/gpfs/rp2773/hf_cache"
@@ -39,10 +39,8 @@ JUDGE_SCHEME="greedy"
 THRESHOLD=9
 NUM_REPEATS=16
 BASE_MODEL_NAME="Qwen/QwQ-32B"  # "Qwen/QwQ-32B" or "deepseek-ai/DeepSeek-R1-Distill-Llama-70B" or "NovaSky-AI/Sky-T1-32B-Preview"
-SMALL_MODEL_NAME="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"  # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B" or "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
 BASE_MODEL_ABBRV="Qwen-32B"  # "Qwen-32B" or "deepseek-70B" or "NovaSky-Preview"
-SMALL_MODEL_ABBRV="deepseek-1.5B"  # "deepseek-1.5B" or "deepseek-7B"
-OUTPUT_DIR="${DATA_DIR}/specreason/results/${JUDGE_SCHEME}_${THRESHOLD}/${DATASET_NAME}/${BASE_MODEL_ABBRV}_${SMALL_MODEL_ABBRV}"
+OUTPUT_DIR="${DATA_DIR}/specreason/results/${JUDGE_SCHEME}_${THRESHOLD}/${DATASET_NAME}/${BASE_MODEL_ABBRV}"
 LOGFILE_DIR="${DATA_DIR}/specreason/logs"
 TP_SIZE=2  # applies for both models
 TOKEN_BUDGET=8192
@@ -74,14 +72,11 @@ wait_for_server() {
     done
 }
 
-# # launch 32b model and 1.5b model one by one
-# vllm serve "$BASE_MODEL_NAME" --dtype auto -tp "$TP_SIZE" --max_model_len 8192 --gpu-memory-utilization 0.8 --enable-prefix-caching --port 30000 &
-# VLLM_BASE_PID=$!
-# wait_for_server 30000
-# nvidia-smi
-# vllm serve "$SMALL_MODEL_NAME" --dtype auto -tp "$TP_SIZE" --max_model_len 8192 --gpu-memory-utilization 0.15 --enable-prefix-caching --port 30001 &
-# VLLM_SMALL_PID=$!
-# wait_for_server 30001
+# launch 32b model and 1.5b model one by one
+vllm serve "$BASE_MODEL_NAME" --dtype auto -tp "$TP_SIZE" --max_model_len 16384 --gpu-memory-utilization 0.75 --enable-prefix-caching --port 30000 &
+VLLM_BASE_PID=$!
+wait_for_server 30000
+nvidia-smi
 
 
 # Run for the first set of problem IDs
@@ -94,7 +89,7 @@ for id in "${ids1[@]}"; do
     pid_list=()
 
     for repeat_id in $(seq 0 $((NUM_REPEATS - 1))); do
-        python spec_reason.py --dataset_name "$DATASET_NAME" --problem_id "$id" --repeat_id "$repeat_id" --score_threshold "${THRESHOLD}" --score_method "${JUDGE_SCHEME}" --token_budget "$TOKEN_BUDGET" --output_dir "$OUTPUT_DIR" >> "$logfile" 2>&1 &
+        python baseline_32b.py --dataset_name "$DATASET_NAME" --problem_id "$id" --repeat_id "$repeat_id" --score_threshold "${THRESHOLD}" --score_method "${JUDGE_SCHEME}" --token_budget "$TOKEN_BUDGET" --output_dir "$OUTPUT_DIR" >> "$logfile" 2>&1 &
 
         # Capture the PID of the last background process and store it in the list
         pid_list+=($!)
@@ -113,4 +108,4 @@ for id in "${ids1[@]}"; do
 done
 
 kill $VLLM_BASE_PID
-kill $VLLM_SMALL_PID
+
