@@ -13,12 +13,12 @@
 #SBATCH --partition=pli
 #SBATCH --account=specreason
 
-# CLUSTER="ravi"
-CLUSTER="della"
+CLUSTER="ravi"
+# CLUSTER="della"
 
 # initialization: set environment variables based on the cluster
 if [ "$CLUSTER" = "ravi" ]; then
-    DATA_DIR="/home/ruipan/data2"
+    DATA_DIR="/home/weiquan/data2"
 elif [ "$CLUSTER" = "della" ]; then
     DATA_DIR="/scratch/gpfs/rp2773/data"
     export HF_HOME="/scratch/gpfs/rp2773/hf_cache"

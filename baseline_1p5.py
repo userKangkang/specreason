@@ -30,10 +30,10 @@ def get_model(model_size):
 
 # %%
 model_names = {
-    "32b": "Qwen/QwQ-32B",
+    "1.5b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
 }
 ports = {
-    "32b": "30000",
+    "1.5b": "30001",
 }
 clients = {}
 for size, full_name in model_names.items():
@@ -243,7 +243,7 @@ try:
         warning_flag = False
         step_time = 0
         if step_id < args.first_n_steps_base_model:  # First n steps use base model
-            base_model_step, finished, num_output_tokens_base, base_model_time = generate_new_step(problem, steps_so_far, "32b", options=options)
+            base_model_step, finished, num_output_tokens_base, base_model_time = generate_new_step(problem, steps_so_far, "1.5b", options=options)
 
             small_model_step, num_output_tokens_small, small_model_time = None, None, None
             score, justification, eval_time = None, None, None
@@ -253,7 +253,7 @@ try:
 
         else:
             # 1. generate a reasoning step using a base model
-            step_str, finished, num_output_tokens, base_model_time = generate_new_step(problem, steps_so_far, "32b", options=options)
+            step_str, finished, num_output_tokens, base_model_time = generate_new_step(problem, steps_so_far, "1.5b", options=options)
             base_model_step, num_output_tokens_base = step_str, num_output_tokens
             step_time += base_model_time
             # NOTE(ruipan): potential optimization is to pipeline the decoding of these two models rather than sequentially
