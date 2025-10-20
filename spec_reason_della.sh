@@ -18,7 +18,7 @@ CLUSTER="ravi"
 
 # initialization: set environment variables based on the cluster
 if [ "$CLUSTER" = "ravi" ]; then
-    DATA_DIR="/home/weiquan/data2"
+    DATA_DIR="/home/weiquan/llms/specreason-copy"
 elif [ "$CLUSTER" = "della" ]; then
     DATA_DIR="/scratch/gpfs/rp2773/data"
     export HF_HOME="/scratch/gpfs/rp2773/hf_cache"
@@ -31,7 +31,7 @@ else
     echo "Error: CLUSTER must be either 'ravi' or 'della'"
     exit 1
 fi
-conda activate specreason
+# conda activate specreason
 
 # SpecR experiment configuration
 DATASET_NAME="aime"

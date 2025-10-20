@@ -1,0 +1,26 @@
+[project]
+name = "specreason"
+version = "0.1.0"
+requires-python = "==3.12.*"
+dependencies = [
+    "vllm==0.8.2",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "torchaudio==2.6.0",
+    "cupy-cuda12x",
+    "accelerate",
+    "modelscope",
+    "transformers",
+    "datasets",
+    "rouge",
+    "fuzzywuzzy",
+    "jieba",
+    "rouge_score",
+    "colorlog",
+    "matplotlib",
+    "seaborn",
+    "llmtest@git+ssh://git@github.com/SJTU-DDST/LLMTest.git",
+]
+
+[tool.uv]
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
