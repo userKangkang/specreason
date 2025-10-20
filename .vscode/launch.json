@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Run with uv",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "${workspaceFolder}/.venv/bin/python", 
+            "program": "${workspaceFolder}/results/process_pickle.py", 
+            "args": ["-u"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

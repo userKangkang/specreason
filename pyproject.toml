@@ -20,6 +20,7 @@ dependencies = [
     "matplotlib",
     "seaborn",
     "llmtest@git+ssh://git@github.com/SJTU-DDST/LLMTest.git",
+    "pandas",
 ]
 
 [tool.uv]
