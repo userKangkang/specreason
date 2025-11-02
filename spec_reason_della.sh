@@ -34,10 +34,10 @@ fi
 # conda activate specreason
 
 # SpecR experiment configuration
-DATASET_NAME="aime"
+DATASET_NAME="gpqa"
 JUDGE_SCHEME="greedy"
 THRESHOLD=9
-NUM_REPEATS=16
+NUM_REPEATS=2
 BASE_MODEL_NAME="Qwen/QwQ-32B"  # "Qwen/QwQ-32B" or "deepseek-ai/DeepSeek-R1-Distill-Llama-70B" or "NovaSky-AI/Sky-T1-32B-Preview"
 SMALL_MODEL_NAME="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"  # "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B" or "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
 BASE_MODEL_ABBRV="Qwen-32B"  # "Qwen-32B" or "deepseek-70B" or "NovaSky-Preview"
@@ -48,7 +48,7 @@ TP_SIZE=2  # applies for both models
 TOKEN_BUDGET=8192
 # Define the list of problem IDs
 # ids1=($(seq 0 99))  # MATH and GPQA
-ids1=($(seq 60 89))  # AIME
+ids1=($(seq 65 80))  # AIME
 
 
 for dir in "$OUTPUT_DIR" "$LOGFILE_DIR"; do

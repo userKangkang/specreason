@@ -18,7 +18,7 @@ CLUSTER="ravi"
 
 # initialization: set environment variables based on the cluster
 if [ "$CLUSTER" = "ravi" ]; then
-    DATA_DIR="/home/weiquan/data2"
+    DATA_DIR="/home/weiquan/llms/specreason-copy"
 elif [ "$CLUSTER" = "della" ]; then
     DATA_DIR="/scratch/gpfs/rp2773/data"
     export HF_HOME="/scratch/gpfs/rp2773/hf_cache"
@@ -34,10 +34,10 @@ fi
 conda activate specreason
 
 # SpecR experiment configuration
-DATASET_NAME="aime"
+DATASET_NAME="math"
 JUDGE_SCHEME="greedy"
 THRESHOLD=9
-NUM_REPEATS=16
+NUM_REPEATS=2
 BASE_MODEL_NAME="Qwen/QwQ-32B"  # "Qwen/QwQ-32B" or "deepseek-ai/DeepSeek-R1-Distill-Llama-70B" or "NovaSky-AI/Sky-T1-32B-Preview"
 BASE_MODEL_ABBRV="Qwen-32B"  # "Qwen-32B" or "deepseek-70B" or "NovaSky-Preview"
 OUTPUT_DIR="${DATA_DIR}/specreason/results/${JUDGE_SCHEME}_${THRESHOLD}/${DATASET_NAME}/${BASE_MODEL_ABBRV}"
@@ -46,7 +46,7 @@ TP_SIZE=2  # applies for both models
 TOKEN_BUDGET=8192
 # Define the list of problem IDs
 # ids1=($(seq 0 99))  # MATH and GPQA
-ids1=($(seq 60 89))  # AIME
+ids1=($(seq 60 80))  # AIME
 
 
 for dir in "$OUTPUT_DIR" "$LOGFILE_DIR"; do
@@ -72,11 +72,7 @@ wait_for_server() {
     done
 }
 
-# launch 32b model and 1.5b model one by one
-vllm serve "$BASE_MODEL_NAME" --dtype auto -tp "$TP_SIZE" --max_model_len 16384 --gpu-memory-utilization 0.75 --enable-prefix-caching --port 30000 &
-VLLM_BASE_PID=$!
-wait_for_server 30000
-nvidia-smi
+
 
 
 # Run for the first set of problem IDs
