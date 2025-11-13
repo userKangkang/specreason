@@ -3,3 +3,4 @@
 *.pickle
 *.csv
 ./results/*
+./results_cot/*

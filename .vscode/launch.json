@@ -5,8 +5,8 @@
             "type": "debugpy",
             "request": "launch",
             "python": "${workspaceFolder}/.venv/bin/python", 
-            "program": "${workspaceFolder}/results/process_pickle.py", 
-            "args": ["-u"],
+            "program": "${workspaceFolder}/spec_cot.py", 
+            "args": ["--dataset_name", "math", "--problem_id", "60", "--repeat_id", "0", "--score_threshold", "7.0", "--score_method", "greedy", "--token_budget", "8192", "--output_dir", "results"],
             "console": "integratedTerminal",
             "justMyCode": false
         }
