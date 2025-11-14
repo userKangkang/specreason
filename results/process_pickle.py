@@ -6,8 +6,8 @@ from datasets import load_dataset, load_from_disk
 
 # 定义要处理的文件夹列表
 folders = ['aime', 'math', 'gpqa']
-models = ['deepseek-1.5B', 'Qwen-32B', 'Qwen-32B_deepseek-1.5B']
-base_path = 'results/greedy_9'
+models = ['Qwen-32B_deepseek-1.5B']
+base_path = 'results_cot/greedy_9'
 
 # 存储所有结果的列表
 summary_data = []
@@ -21,7 +21,7 @@ def check_accuracy(step_str, ground_truth):
     ground_truth_clean = str(ground_truth).strip().lower()
     
     # 检查step_str是否包含正确答案
-    return ground_truth_clean in step_str_clean
+    return ("{" + ground_truth_clean + "}") in step_str_clean or (ground_truth_clean + ")") in step_str_clean or ("answer is " + ground_truth_clean) in step_str_clean
 
 for folder in folders:
     if folder == "aime":
@@ -100,7 +100,7 @@ for folder in folders:
                         elif folder == "gpqa":
                             ground_truth = "A"
                             
-                        ground_truth = "{" + ground_truth + "}"
+                        ground_truth = ground_truth
                         
                         # 检查准确性
                         is_correct = check_accuracy(step_str, ground_truth)
